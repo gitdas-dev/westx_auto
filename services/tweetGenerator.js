@@ -25,6 +25,14 @@ const PREFIXES = [
     "Tech Trend:", "Just In:", "Hot Take:", "Quick Update:", "Tech News:"
 ];
 
+const FALLBACK_TWEETS = [
+    "Exploring the latest in AI technology! The future is here 🚀 #TechNews",
+    "Innovation never stops in the tech world! New breakthroughs daily 💡 #Innovation",
+    "The digital transformation continues to reshape our world 🌐 #Technology",
+    "AI and machine learning are evolving faster than ever ⚡ #AI #Tech",
+    "Big data is revolutionizing how we make decisions 📊 #BigData"
+];
+
 function getRandomElement(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
@@ -62,22 +70,23 @@ async function generateTweet(retries = 8) {
             let tweet = response.generated_text.trim();
             tweet = tweet.replace(/^["']|["']$/g, '').trim();
             
-            if (tweet.length === 0) {
-                throw new Error('Generated tweet is empty');
+            // If generated tweet is empty, use a fallback
+            if (!tweet || tweet.length === 0) {
+                tweet = getRandomElement(FALLBACK_TWEETS);
             }
 
-            // Add unique elements to make each tweet different
             const uniqueTweet = addUniqueElements(tweet);
-            
-            // Ensure tweet is within Twitter's character limit
             return uniqueTweet.length > 280 ? uniqueTweet.substring(0, 277) + "..." : uniqueTweet;
             
         } catch (error) {
             console.error(`Error generating tweet: ${error.message}`);
-            if (retries === 1) throw error;
+            if (retries === 1) {
+                // Use fallback on final retry
+                const fallbackTweet = addUniqueElements(getRandomElement(FALLBACK_TWEETS));
+                return fallbackTweet;
+            }
             console.warn(`Retrying tweet generation. Attempts left: ${retries - 1}`);
             retries--;
-            // Adjusted exponential backoff for 8 retries
             await new Promise(resolve => setTimeout(resolve, (9 - retries) * 1000));
         }
     }

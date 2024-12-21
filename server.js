@@ -11,8 +11,8 @@ import path from 'path';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Schedule tweet generation and posting every minute
-cron.schedule('* * * * *', async () => {
+// Schedule tweet generation and posting every 2 minutes
+cron.schedule('*/2 * * * *', async () => {
     try {
         const tweet = await generateTweet();
         await postTweet(tweet);
